@@ -8,17 +8,17 @@ function x(p) {
 }
 
 function X(p) {
-    _.params = p
+    _.el = p
 }
 
 function fix(callback) {
-    if (typeof(_.params) !== "object") {
-        var e = document.querySelectorAll(_.params)
+    if (typeof(_.el) !== "object") {
+        var e = document.querySelectorAll(_.el)
         for (var i = 0; i < e.length; i++) {
             callback(e.item(i))
         }
     } else {
-        callback(_.params)
+        callback(_.el)
     }
 }
 
