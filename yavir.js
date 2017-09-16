@@ -138,8 +138,6 @@ Yavir.prototype.run = function () {
     if (window.location.hash === "")
         window.location.hash = '/';
 
-    log(window.location.hash);
-
     render();
     renderActive();
 
