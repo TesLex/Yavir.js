@@ -1,2 +1,2 @@
 # yavir.js
-Simle JS Framework
+Simple JS Framework
