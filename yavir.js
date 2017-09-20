@@ -29,8 +29,8 @@ X.prototype.html = function (html) {
     if (typeof(html) !== "undefined")
         fix(e => e.innerHTML = html);
     else
-        fix(e => log(e.innerHTML));
-    // return this.hml
+        fix(e => _.hml = e.innerHTML);
+    return _.hml
 };
 
 X.prototype.val = function () {
@@ -63,13 +63,48 @@ X.prototype.replace = function (reg, to) {
 
 X.prototype.createElement = function (element) {
     fix(e => leme = e.createElement(element));
-    log(leme);
     return leme;
 };
 
 X.prototype.appendChild = function (child) {
     fix(e => leme = e.appendChild(child));
     return leme;
+};
+
+X.prototype.setCookie = function setCookie(name, value, options) {
+    options = options || {};
+
+    var expires = options.expires;
+
+    if (typeof expires === "number" && expires) {
+        let d = new Date();
+        d.setTime(d.getTime() + expires * 1000);
+        expires = options.expires = d;
+    }
+    if (expires && expires.toUTCString) {
+        options.expires = expires.toUTCString();
+    }
+
+    value = encodeURIComponent(value);
+
+    let updatedCookie = name + "=" + value;
+
+    for (let propName in options) {
+        updatedCookie += "; " + propName;
+        let propValue = options[propName];
+        if (propValue !== true) {
+            updatedCookie += "=" + propValue;
+        }
+    }
+
+    document.cookie = updatedCookie;
+};
+
+X.prototype.getCookie = function getCookie(name) {
+    let matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
 };
 
 X.prototype.request = function (params) {
