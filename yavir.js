@@ -205,6 +205,10 @@ Yavir.prototype.run = function () {
 				eval(x.innerHTML)
 			});
 
+			x('title[load]').fix(x => {
+				window.document.title = x.innerHTML
+			});
+
 			if (found.script !== undefined)
 				found.script()
 		} else {
