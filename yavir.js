@@ -1,25 +1,27 @@
 const XHR = ("onload" in new XMLHttpRequest()) ? XMLHttpRequest : XDomainRequest;
 const xhttp = new XHR();
 
-const root = this;
+const $ = this;
+
+const $route = {};
 
 function x(p) {
 	return new X(p)
 }
 
 function X(p) {
-	root.el = p
+	$.el = p
 }
 
 function fix(callback) {
-	if (typeof(root.el) !== "object") {
-		document.querySelectorAll(root.el).forEach(function (e) {
+	if (typeof($.el) !== "object") {
+		document.querySelectorAll($.el).forEach(function (e) {
 			callback(e)
 		});
 	} else {
-		callback(root.el)
+		callback($.el)
 	}
-	return x(root.el)
+	return x($.el)
 }
 
 X.prototype.fix = function (callback) {
@@ -117,7 +119,7 @@ function request(params) {
 		}
 	}
 
-	if ("undefined" !== typeof params.async) params.async = true;
+	if ("undefined" === typeof params.async) params.async = true;
 
 	xhttp.open(params.method, params.url, params.async);
 	xhttp.send();
@@ -166,25 +168,25 @@ function request(params) {
 }
 
 function Yavir(prms) {
-	root.Yavor = prms;
+	$.Yavor = prms;
 }
 
 
 Yavir.prototype.run = function () {
 
-	if (root.Yavor.mode === 'hash' && window.location.hash === "") {
+	if ($.Yavor.mode === 'hash' && window.location.hash === "") {
 		history.replaceState({}, '', '#/');
 	}
 
 	render();
 	renderActive();
 
-	x(window).on(root.Yavor.mode === 'hash' ? 'hashchange' : 'popstate', function () {
+	x(window).on($.Yavor.mode === 'hash' ? 'hashchange' : 'popstate', function () {
 		renderActive()
 	});
 
 	function render() {
-		for (const e of root.Yavor.components) {
+		for (const e of $.Yavor.components) {
 			if (e.route === undefined) {
 				x(e.selector).html(e.template);
 				if (e.script !== undefined)
@@ -193,32 +195,64 @@ Yavir.prototype.run = function () {
 		}
 	}
 
+	function matchPath(p, r) {
+		let names = p.match(new RegExp(':([a-zA-Z]+)', 'g'));
+
+		p = p.replace(new RegExp(':([a-zA-Z]+)', 'g'), '([a-zA-Z0-9]+)');
+		let params = r.match(new RegExp('^' + p + '$'));
+
+		$route['path'] = r;
+
+		if (params !== null && names !== null)
+			for (let i = 1; i <= names.length; i++)
+				$route[names[i - 1].replace(':', '')] = params[i];
+
+		return params !== null;
+	}
+
 	function renderActive() {
-		const found = root.Yavor.components.find(function (e) {
-			return root.Yavor.mode === 'hash' ? e.route === window.location.hash.substr(1, window.location.hash.length) : e.route === window.location.pathname;
+		const found = $.Yavor.components.find(function (e) {
+			if ($.Yavor.mode === 'hash' && ("undefined" !== typeof e.route)) {
+				return matchPath(e.route, window.location.hash.substr(1, window.location.hash.length));
+			} else {
+				return matchPath(e.route, window.location.pathname);
+			}
 		});
 
 		if (found) {
-			x('view').html('<' + found.selector + '>' + '</' + found.selector + '>');
-			x(found.selector).html(found.template);
+			x($.Yavor.el).html('<' + found.selector + '>' + '</' + found.selector + '>');
+			x(found.selector).html(("function" === typeof found.template) ? found.template() : found.template);
+
+			if (found.components !== null && "undefined" !== typeof found.components) {
+				found.components.forEach(function (component, i, a) {
+					renderComponent(component);
+				});
+			}
+
 			x('script[load]').fix(x => {
-				eval(x.innerHTML)
+				window.eval(x.innerHTML)
 			});
 
 			x('title[load]').fix(x => {
 				window.document.title = x.innerHTML
 			});
-
-			if (found.script !== undefined)
-				found.script()
 		} else {
-			x('view').html('404')
+			x('view').html(page('pages/404.html'))
+		}
+	}
+
+	function renderComponent(component) {
+		x(component.selector).html(("function" === typeof component.template) ? component.template() : component.template);
+		if (component.components !== null && "undefined" !== typeof component.components) {
+			component.components.forEach(function (c, i, a) {
+				renderComponent(c);
+			});
 		}
 	}
 };
 
 function url(href) {
-	if (root.Yavor.mode === 'hash') {
+	if ($.Yavor.mode === 'hash') {
 		window.location.hash = href
 	} else {
 		history.pushState({}, '', href);
@@ -230,10 +264,10 @@ function log(text) {
 	console.log(text)
 }
 
-function page(file) {
+function page(file, async = false) {
 	let rawFile = new XMLHttpRequest();
 	let s;
-	rawFile.open("GET", file, false);
+	rawFile.open("GET", file, async);
 	rawFile.onreadystatechange = function () {
 		if (rawFile.readyState === 4) {
 			if (rawFile.status === 200 || rawFile.status === 0) {
