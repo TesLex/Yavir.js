@@ -75,9 +75,10 @@ class Yavir {
 	}
 
 	match(path, route) {
+		let names = path.match(new RegExp('{([a-zA-Z0-9]+)}', 'g'));
+
 		path = path.replace(new RegExp('{([a-zA-Z]+)}', 'g'), '(.+)');
 
-		let names = path.match(new RegExp('{([a-zA-Z0-9]+)}', 'g'));
 		let params = route.match(new RegExp('^' + path + '$'));
 
 		$route['path'] = route;
@@ -95,21 +96,16 @@ class Yavir {
 		let start = tpl.indexOf('<script load>');
 		let end = tpl.substr(start, tpl.length).indexOf('</script>');
 
+		x(component.selector).html(tpl);
+
 		if (start > 0 && end > 0) {
 			window.eval(tpl.substr(start + 13, end - 13));
 		}
 
-		x(component.selector).html(tpl);
-
-		tpl = tpl.replace(new RegExp('{{(.+)}}', 'g'), (q, val) => {
+		x(component.selector).html(x(component.selector).html().replace(new RegExp('{{([a-zA-Z0-9]+)}}', 'g'), (q, val) => {
 			val = $data[val];
-
 			return typeof val === 'function' ? val() : val
-		});
-
-		x('script[load]').exec(x => {
-			window.eval(x.innerHTML)
-		});
+		}));
 
 		x('title[load]').exec(x => window.document.title = x.innerHTML);
 
@@ -124,7 +120,7 @@ class Yavir {
 		x('*').removeClass('active-route');
 
 		let found = this.app.components.find(e => {
-			if (this.app.mode === 'hash' && (typeof e.route === 'undefined')) {
+			if ($mode === 'hash') {
 				return typeof e.route === 'undefined' ? false : this.match(e.route, window.location.hash.substr(1, window.location.hash.length));
 			} else {
 				return typeof e.route === 'undefined' ? false : this.match(e.route, window.location.pathname);
@@ -136,7 +132,7 @@ class Yavir {
 
 			this.renderComponent(found);
 
-			x('.' + found.route.replace('/', '_')).addClass('active-route')
+			// x('.' + found.route.replace('/', '_')).addClass('active-route')
 		} else {
 			x('view').html('404')
 		}
@@ -145,7 +141,7 @@ class Yavir {
 	run() {
 		$mode = this.app.mode;
 
-		if (this.app.mode === 'hash' && window.location.hash === "") {
+		if ($mode === 'hash' && window.location.hash === "") {
 			history.replaceState({}, '', '#/');
 		}
 
@@ -158,7 +154,7 @@ class Yavir {
 
 		this.renderActive();
 
-		x(window).on(this.app.mode === 'hash' ? 'hashchange' : 'popstate', () => {
+		x(window).on($mode === 'hash' ? 'hashchange' : 'popstate', () => {
 			this.renderActive()
 		});
 	}

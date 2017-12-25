@@ -117,9 +117,10 @@ var Yavir = function () {
 	_createClass(Yavir, [{
 		key: 'match',
 		value: function match(path, route) {
+			var names = path.match(new RegExp('{([a-zA-Z0-9]+)}', 'g'));
+
 			path = path.replace(new RegExp('{([a-zA-Z]+)}', 'g'), '(.+)');
 
-			var names = path.match(new RegExp('{([a-zA-Z0-9]+)}', 'g'));
 			var params = route.match(new RegExp('^' + path + '$'));
 
 			$route['path'] = route;
@@ -136,21 +137,16 @@ var Yavir = function () {
 			var start = tpl.indexOf('<script load>');
 			var end = tpl.substr(start, tpl.length).indexOf('</script>');
 
+			x(component.selector).html(tpl);
+
 			if (start > 0 && end > 0) {
 				window.eval(tpl.substr(start + 13, end - 13));
 			}
 
-			x(component.selector).html(tpl);
-
-			tpl = tpl.replace(new RegExp('{{(.+)}}', 'g'), function (q, val) {
+			x(component.selector).html(x(component.selector).html().replace(new RegExp('{{([a-zA-Z0-9]+)}}', 'g'), function (q, val) {
 				val = $data[val];
-
 				return typeof val === 'function' ? val() : val;
-			});
-
-			x('script[load]').exec(function (x) {
-				window.eval(x.innerHTML);
-			});
+			}));
 
 			x('title[load]').exec(function (x) {
 				return window.document.title = x.innerHTML;
@@ -170,7 +166,7 @@ var Yavir = function () {
 			x('*').removeClass('active-route');
 
 			var found = this.app.components.find(function (e) {
-				if (_this.app.mode === 'hash' && typeof e.route === 'undefined') {
+				if ($mode === 'hash') {
 					return typeof e.route === 'undefined' ? false : _this.match(e.route, window.location.hash.substr(1, window.location.hash.length));
 				} else {
 					return typeof e.route === 'undefined' ? false : _this.match(e.route, window.location.pathname);
@@ -182,7 +178,7 @@ var Yavir = function () {
 
 				this.renderComponent(found);
 
-				x('.' + found.route.replace('/', '_')).addClass('active-route');
+				// x('.' + found.route.replace('/', '_')).addClass('active-route')
 			} else {
 				x('view').html('404');
 			}
@@ -194,7 +190,7 @@ var Yavir = function () {
 
 			$mode = this.app.mode;
 
-			if (this.app.mode === 'hash' && window.location.hash === "") {
+			if ($mode === 'hash' && window.location.hash === "") {
 				history.replaceState({}, '', '#/');
 			}
 
@@ -227,7 +223,7 @@ var Yavir = function () {
 
 			this.renderActive();
 
-			x(window).on(this.app.mode === 'hash' ? 'hashchange' : 'popstate', function () {
+			x(window).on($mode === 'hash' ? 'hashchange' : 'popstate', function () {
 				_this2.renderActive();
 			});
 		}
