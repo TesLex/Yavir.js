@@ -1,267 +1,178 @@
-const XHR = ("onload" in new XMLHttpRequest()) ? XMLHttpRequest : XDomainRequest;
-const xhttp = new XHR();
+let $route = {};
+let $data = {};
+let $mode = 'hash';
 
-const $ = this;
-
-const $route = {};
-
-function x(p) {
-	return new X(p)
+function x(el) {
+	return new X(el)
 }
 
-function X(p) {
-	$.el = p
-}
+class X {
+	constructor(el) {
+		this.el = el
+	}
 
-function fix(callback) {
-	if (typeof($.el) !== "object") {
-		document.querySelectorAll($.el).forEach(function (e) {
-			callback(e)
+	on(type, callback) {
+		this.exec(e => e.addEventListener(type, callback))
+	}
+
+	html(content) {
+		let tmp;
+
+		if (typeof content !== 'undefined')
+			return this.exec(e => e.innerHTML = content);
+		else
+			this.exec(e => tmp = e.innerHTML);
+
+		return tmp ? tmp : new X(this.el)
+	}
+
+	addClass(clazz) {
+		return this.exec(e => {
+			clazz.split(' ').forEach(c => e.classList.add(c))
 		});
-	} else {
-		callback($.el)
-	}
-	return x($.el)
-}
-
-X.prototype.fix = function (callback) {
-	fix(callback)
-};
-
-X.prototype.on = function (type, callback) {
-	fix(e => e.addEventListener(type, callback))
-};
-
-X.prototype.html = function (html) {
-	let tmp = '';
-	if (typeof(html) !== "undefined")
-		fix(e => e.innerHTML = html);
-	else
-		fix(e => tmp = e.innerHTML);
-	return tmp
-};
-
-X.prototype.val = function () {
-	fix(e => this.val = e.value);
-	return this.val
-};
-
-X.prototype.addClass = function (cls) {
-	return fix(e => e.classList.add(cls));
-};
-
-X.prototype.removeClass = function (cls) {
-	return fix(e => e.classList.remove(cls))
-};
-
-X.prototype.hasClass = function (cls) {
-	let hasClass = false;
-	fix(e => hasClass = e.classList.contains(cls));
-	return hasClass
-};
-
-X.prototype.style = function (style) {
-	return fix(e => e.style(style))
-};
-
-X.prototype.createElement = function (element) {
-	return fix(e => e.createElement(element));
-};
-
-X.prototype.appendChild = function (child) {
-	return fix(e => e.appendChild(child));
-};
-
-function setCookie(name, value, options) {
-	options = options || {};
-
-	let expires = options.expires;
-
-	if (typeof expires === "number" && expires) {
-		let d = new Date();
-		d.setTime(d.getTime() + expires * 1000);
-		expires = options.expires = d;
 	}
 
-	if (expires && expires.toUTCString) {
-		options.expires = expires.toUTCString();
+	removeClass(clazz) {
+		return this.exec(e => {
+			clazz.split(' ').forEach(c => e.classList.remove(c))
+		});
 	}
 
-	value = encodeURIComponent(value);
-
-	let updatedCookie = name + "=" + value;
-
-	for (let propName in options) {
-		updatedCookie += "; " + propName;
-		let propValue = options[propName];
-		if (propValue !== true) {
-			updatedCookie += "=" + propValue;
-		}
+	hasClass(clazz) {
+		let hasClass = false;
+		this.exec(e => hasClass = e.classList.contains(clazz));
+		return hasClass
 	}
 
-	document.cookie = updatedCookie;
-}
+	style(style) {
+		return this.exec(e => e.style(style))
+	}
 
-function getCookie(name) {
-	let matches = document.cookie.match(new RegExp(
-		"(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-	));
-	return matches ? decodeURIComponent(matches[1]) : undefined;
-}
+	createElement(el) {
+		return this.exec(e => e.createElement(el));
+	}
 
-function request(params) {
+	appendChild(el) {
+		return this.exec(e => e.appendChild(el));
+	}
 
-	if ("undefined" !== typeof params.headers) {
-		if (params.headers.length !== 0) {
-			params.headers.forEach(function (e) {
-				xhttp.setRequestHeader(e.a, e.b)
+	exec(callback) {
+		if (typeof this.el !== 'object') {
+			document.querySelectorAll(this.el).forEach(e => {
+				callback(e)
 			});
+		} else {
+			callback(this.el)
 		}
-	}
 
-	if ("undefined" === typeof params.async) params.async = true;
-
-	xhttp.open(params.method, params.url, params.async);
-	xhttp.send();
-
-	if ("undefined" !== typeof params.onStart) {
-		xhttp.onloadstart = function () {
-			params.onStart(xhttp)
-		}
-	}
-
-	if ("undefined" !== typeof params.onProgress) {
-		xhttp.onprogress = function (event) {
-			params.onProgress(event)
-		}
-	}
-
-	if ("undefined" !== typeof params.onAbort) {
-		xhttp.onabort = function () {
-			params.onAbort(xhttp)
-		}
-	}
-
-	if ("undefined" !== typeof params.onError) {
-		xhttp.onerror = function () {
-			params.onError(xhttp)
-		}
-	}
-
-	if ("undefined" !== typeof params.onSuccess) {
-		xhttp.onload = function () {
-			params.onSuccess(xhttp)
-		}
-	}
-
-	if ("undefined" !== typeof params.onTimeout) {
-		xhttp.ontimeout = function () {
-			params.onTimeout(xhttp)
-		}
-	}
-
-	if ("undefined" !== typeof params.onComplete) {
-		xhttp.onloadend = function () {
-			params.onComplete(xhttp)
-		}
+		return x(this.el)
 	}
 }
 
-function Yavir(prms) {
-	$.Yavor = prms;
-}
-
-
-Yavir.prototype.run = function () {
-
-	if ($.Yavor.mode === 'hash' && window.location.hash === "") {
-		history.replaceState({}, '', '#/');
+class Yavir {
+	constructor(el) {
+		this.app = el;
 	}
 
-	render();
-	renderActive();
+	match(path, route) {
+		path = path.replace(new RegExp('{([a-zA-Z]+)}', 'g'), '(.+)');
 
-	x(window).on($.Yavor.mode === 'hash' ? 'hashchange' : 'popstate', function () {
-		renderActive()
-	});
+		let names = path.match(new RegExp('{([a-zA-Z0-9]+)}', 'g'));
+		let params = route.match(new RegExp('^' + path + '$'));
 
-	function render() {
-		for (const e of $.Yavor.components) {
-			if (e.route === undefined) {
-				x(e.selector).html(e.template);
-				if (e.script !== undefined)
-					e.script()
-			}
-		}
-	}
-
-	function matchPath(p, r) {
-		let names = p.match(new RegExp(':([a-zA-Z]+)', 'g'));
-
-		p = p.replace(new RegExp(':([a-zA-Z]+)', 'g'), '([a-zA-Z0-9]+)');
-		let params = r.match(new RegExp('^' + p + '$'));
-
-		$route['path'] = r;
+		$route['path'] = route;
 
 		if (params !== null && names !== null)
 			for (let i = 1; i <= names.length; i++)
-				$route[names[i - 1].replace(':', '')] = params[i];
+				$route[names[i - 1].replace('{', '').replace('}', '')] = params[i];
 
 		return params !== null;
 	}
 
-	function renderActive() {
-		const found = $.Yavor.components.find(function (e) {
-			if ($.Yavor.mode === 'hash' && ("undefined" !== typeof e.route)) {
-				return matchPath(e.route, window.location.hash.substr(1, window.location.hash.length));
+	renderComponent(component) {
+		let tpl = ("function" === typeof component.template) ? component.template() : component.template;
+
+		let start = tpl.indexOf('<script load>');
+		let end = tpl.substr(start, tpl.length).indexOf('</script>');
+
+		if (start > 0 && end > 0) {
+			window.eval(tpl.substr(start + 13, end - 13));
+		}
+
+		x(component.selector).html(tpl);
+
+		tpl = tpl.replace(new RegExp('{{(.+)}}', 'g'), (q, val) => {
+			val = $data[val];
+
+			return typeof val === 'function' ? val() : val
+		});
+
+		x('script[load]').exec(x => {
+			window.eval(x.innerHTML)
+		});
+
+		x('title[load]').exec(x => window.document.title = x.innerHTML);
+
+		if (component.components !== null && "undefined" !== typeof component.components) {
+			component.components.forEach(function (c) {
+				this.renderComponent(c);
+			});
+		}
+	}
+
+	renderActive() {
+		x('*').removeClass('active-route');
+
+		let found = this.app.components.find(e => {
+			if (this.app.mode === 'hash' && (typeof e.route === 'undefined')) {
+				return typeof e.route === 'undefined' ? false : this.match(e.route, window.location.hash.substr(1, window.location.hash.length));
 			} else {
-				return matchPath(e.route, window.location.pathname);
+				return typeof e.route === 'undefined' ? false : this.match(e.route, window.location.pathname);
 			}
 		});
 
 		if (found) {
-			x($.Yavor.el).html('<' + found.selector + '>' + '</' + found.selector + '>');
-			x(found.selector).html(("function" === typeof found.template) ? found.template() : found.template);
+			x(this.app.el).html('<' + found.selector + '>' + '</' + found.selector + '>');
 
-			if (found.components !== null && "undefined" !== typeof found.components) {
-				found.components.forEach(function (component, i, a) {
-					renderComponent(component);
-				});
-			}
+			this.renderComponent(found);
 
-			x('script[load]').fix(x => {
-				window.eval(x.innerHTML)
-			});
-
-			x('title[load]').fix(x => {
-				window.document.title = x.innerHTML
-			});
+			x('.' + found.route.replace('/', '_')).addClass('active-route')
 		} else {
-			x('view').html(page('pages/404.html'))
+			x('view').html('404')
 		}
 	}
 
-	function renderComponent(component) {
-		x(component.selector).html(("function" === typeof component.template) ? component.template() : component.template);
-		if (component.components !== null && "undefined" !== typeof component.components) {
-			component.components.forEach(function (c, i, a) {
-				renderComponent(c);
-			});
+	run() {
+		$mode = this.app.mode;
+
+		if (this.app.mode === 'hash' && window.location.hash === "") {
+			history.replaceState({}, '', '#/');
 		}
+
+		for (const e of this.app.components) {
+			if (e.route === undefined)
+				x(e.selector).html(typeof e.template === 'function' ? e.template() : e.template);
+		}
+
+		if (typeof this.app.path === 'undefined') this.app.path = '/';
+
+		this.renderActive();
+
+		x(window).on(this.app.mode === 'hash' ? 'hashchange' : 'popstate', () => {
+			this.renderActive()
+		});
 	}
-};
+}
 
 function url(href) {
-	if ($.Yavor.mode === 'hash') {
+	if ($mode === 'hash') {
 		window.location.hash = href
 	} else {
 		history.pushState({}, '', href);
 		window.dispatchEvent(new Event('popstate'));
 	}
-}
 
-function log(text) {
-	console.log(text)
+	return false
 }
 
 function page(file, async = false) {
@@ -277,4 +188,10 @@ function page(file, async = false) {
 	};
 	rawFile.send(null);
 	return s;
+}
+
+function log(...text) {
+	text.forEach(function (e) {
+		console.log(e);
+	});
 }

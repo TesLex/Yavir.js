@@ -3,3 +3,6 @@ index.html
 css/
 js/
 pages/
+node_modules/
+package-lock.json
+use/static/
