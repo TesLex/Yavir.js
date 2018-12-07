@@ -1,7 +1,7 @@
 # yavir.js
 Simple JS Framework
 
-CDN: ```https://cdn.rawgit.com/TesLex/Yavir.js/master/use/yavir.js```
+CDN: ```https://cdn.jsdelivr.net/gh/TesLex/Yavir.js/use/yavir.js```
 
 
 ### Who is using?
